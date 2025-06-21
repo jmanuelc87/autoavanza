@@ -1,11 +1,15 @@
 import os
+import sys
 import cv2
+import fitz
 import dotenv
 import base64
 import functools
 
 from io import BytesIO
 from PIL import Image
+
+from tempfile import NamedTemporaryFile
 
 from application.prompts import extract, validate
 from application.rules import tools, validate_documents
@@ -23,47 +27,75 @@ from langchain_community.document_loaders.image import UnstructuredImageLoader
 dotenv.load_dotenv(dotenv.find_dotenv())
 
 
-__llm = ChatOpenAI(
-    model="gpt-4.1-mini",
-    temperature=0,
-)
+def __load_pdf2img(args):
+    mat = fitz.Matrix(3, 3)
+    filename: str = args["filename"]
+    if filename.endswith(("jpg", "jpeg", "png")):
+        return args
+
+    doc = fitz.open(args["filename"])
+    temp_file = ""
+    for page in doc:
+        pix = page.get_pixmap(matrix=mat)
+        with NamedTemporaryFile(suffix=".png", delete=False) as tmp:
+            pix.save(tmp.name)
+            temp_file = tmp.name
+
+    return {"filename": temp_file, "doc_name": args["doc_name"]}
 
 
-scanner = Scanner()
-
-
-def __load_image(inputs):
-    """Load image from file and encode it as base64."""
-    pil_image = inputs["image"]
-
-    def encode_image(pil_image):
-        img_buffer = BytesIO()
-        pil_image.save(img_buffer, format="JPEG")
-        byte_data = img_buffer.getvalue()
-        base64_str = base64.b64encode(byte_data)
-        return base64_str
-
-    image_base64 = encode_image(pil_image)
-    return image_base64
+def __load_unstructured_image(args):
+    pil_image = args["image"]
+    with NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+        pil_image.save(tmp.name, format="JPEG")
+        tmp_path = tmp.name
+    loader = UnstructuredImageLoader(tmp_path)
+    try:
+        docs = loader.load()
+        page = docs.pop()
+        return page.page_content or ""
+    except TypeError as e:
+        print(e)
+        return ""
+    finally:
+        os.remove(tmp_path)
 
 
 def __scanner(args):
+    scanner = Scanner()
     image = cv2.imread(args["filename"])
     out = scanner.get_document_from(image)
-    h, w = out.shape[:2]
-    r_h, r_w = (h * 0.6) / h, (w * 0.6) / w
-    out = cv2.resize(out, None, fx=r_w, fy=r_h, interpolation=cv2.INTER_LINEAR)
-    cv2.imwrite(args["doc_name"] + ".jpg", out)
-    return {"image": Image.fromarray(out)}
+    return {"image": out, "doc_name": args["doc_name"]}
 
 
-def __image_preprocessing(args):
-    pass
+def __image_preprocessing_card(args):
+    image = args["image"]
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    cv2.imwrite(args["doc_name"] + ".jpg", thresh)
+    return {"image": Image.fromarray(thresh)}
+
+
+def __image_preprocessing_doc(args):
+    image = args["image"]
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    cv2.imwrite(args["doc_name"] + ".jpg", thresh)
+    return {"image": Image.fromarray(thresh)}
 
 
 def get_validation_chatbot():
+    __llm = ChatOpenAI(
+        model="gpt-4.1-mini",
+        temperature=0,
+        streaming=False,
+    )
+
+    load_pdf2img = RunnableLambda(__load_pdf2img)
+    preprocessing_card = RunnableLambda(__image_preprocessing_card)
+    preprocessing_fac = RunnableLambda(__image_preprocessing_doc)
     loader1 = RunnableLambda(__scanner)
-    loader2 = RunnableLambda(__load_image)
+    loader3 = RunnableLambda(__load_unstructured_image)
 
     prompt_extraction = ChatPromptTemplate.from_messages(extract)
 
@@ -71,7 +103,7 @@ def get_validation_chatbot():
 
     extract_fac_chain = (
         {
-            "image": loader1 | loader2,
+            "page_content": load_pdf2img | loader1 | preprocessing_fac | loader3,
             "doc_name": itemgetter("doc_name"),
         }
         | prompt_extraction
@@ -82,7 +114,7 @@ def get_validation_chatbot():
 
     extract_tc_chain = (
         {
-            "image": loader1 | loader2,
+            "page_content": load_pdf2img | loader1 | preprocessing_card | loader3,
             "doc_name": itemgetter("doc_name"),
         }
         | prompt_extraction
@@ -93,7 +125,7 @@ def get_validation_chatbot():
 
     extract_ine_chain = (
         {
-            "image": loader1 | loader2,
+            "page_content": load_pdf2img | loader1 | preprocessing_card | loader3,
             "doc_name": itemgetter("doc_name"),
         }
         | prompt_extraction
@@ -128,13 +160,13 @@ def get_validation_chatbot():
 
 
 if __name__ == "__main__":
-    llm = get_validation_chatbot()
+    chat = get_validation_chatbot()
 
-    result = llm.invoke(
+    result = chat.invoke(
         input={
-            "factura": "20250612_181153.jpg",
-            "tc": "20250612_183027.jpg",
-            "ine": "20250612_181121.jpg",
+            "factura": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181153.jpg",
+            "tc": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_183027.jpg",
+            "ine": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181121.jpg",
         }
     )
 

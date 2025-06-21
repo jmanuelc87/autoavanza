@@ -64,7 +64,7 @@ def compare_vin(
     if wr >= 90.0:
         result.append("El NIV del vehiculo es correcto!")
     else:
-        result.append("El NIV es distinto. Se tiene que rechazar el tramite!")
+        result.append("El NIV no coincide")
 
     wr2 = fuzz.WRatio(factura.no_motor, tarjeta_circulacion.no_motor)
 
@@ -93,19 +93,19 @@ def compare_vehicle_data(
     wr = fuzz.WRatio(factura.marca, tarjeta_circulacion.marca)
 
     if wr < 90.0:
-        label = f"La marca del vehiculo es distinto. Favor de verificar"
+        label = f"La marca del vehiculo es distinto."
         result.append(label)
 
-    wr = fuzz.WRatio(factura.linea, tarjeta_circulacion.vehiculo)
+    wr = fuzz.WRatio(factura.version, tarjeta_circulacion.vehiculo)
 
     if wr < 90.0:
-        label = "La linea del vehiculo es distinta. Favor de verificar"
+        label = "La version del vehiculo es distinta."
         result.append(label)
 
     wr = fuzz.WRatio(str(factura.modelo), str(tarjeta_circulacion.modelo))
 
     if wr < 90.0:
-        label = "El modelo del vehiculo es distinto. Favor de verificar"
+        label = "El modelo del vehiculo es distinto."
         result.append(label)
 
     if len(result) == 0:
@@ -143,8 +143,15 @@ def check_validity(credencial_votar: CredencialVotar, **kwargs) -> str:
     Returns:
         str: El resultado de la validacion es approvador o rechazado
     """
+    vigencia = credencial_votar.vigencia
+
+    if "-" in vigencia:
+        vigencia = vigencia.split("-")[1]
+
+    vigencia = int(vigencia)
+
     current_year = datetime.datetime.now().year
-    if current_year > credencial_votar.vigencia:
+    if current_year > vigencia:
         return "La Credencial para Votar no esta vigente"
     return "La Credencial para Votar es vigente"
 
@@ -154,7 +161,7 @@ tools = [
     compare_vin,
     compare_vehicle_data,
     compare_motor,
-    check_validity,
+    # check_validity,
 ]
 
 
@@ -175,5 +182,5 @@ def validate_documents(inputs, tools):
             results.extend(result)
         else:
             results.append(result)
-    print(inputs)
+
     return {"items": results}
