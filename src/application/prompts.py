@@ -20,7 +20,7 @@ validate = [
         "Como analista de validaciones de empeño de auto, quiero verificar que la factura del vehículo cumpla con los requisitos de autenticidad y datos correctos, para garantizar que el auto no tenga problemas legales o administrativos antes de otorgar el préstamo."
     ),
     AIMessagePromptTemplate.from_template(
-        """De acuerdo a la siguiente lista dime si es aprobado o rechazado el tramite de acuerdo a las siguientes reglas. La Marca, version, y modelo no rechazan el trámite si no coinciden todas las demas si."""
+        """De acuerdo a la siguiente lista, de forma conscisa escribe Aprobado o Rechazado el tramite de acuerdo a las siguientes reglas. La Marca, version, y modelo no rechazan el trámite si no coinciden todas las demas si."""
     ),
     HumanMessagePromptTemplate.from_template("""{items}"""),
 ]
