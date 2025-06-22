@@ -3,11 +3,9 @@ import sys
 import cv2
 import fitz
 import dotenv
-import base64
 import functools
 import pandas as pd
 
-from io import BytesIO
 from PIL import Image
 
 from tempfile import NamedTemporaryFile
