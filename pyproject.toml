@@ -38,6 +38,8 @@ dependencies = [
     "dotenv (>=0.9.9,<0.10.0)",
     "opencv-python (>=4.11.0.86,<5.0.0.0)",
     "scikit-image (>=0.25.2,<0.26.0)",
+    "joblib (>=1.5.1,<2.0.0)",
+    "xgboost (==2.1.4)",
 ]
 
 
