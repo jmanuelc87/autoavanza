@@ -1,5 +1,6 @@
 from flask import Flask, request
 from collections import defaultdict
+from application.main import get_validation_chatbot
 import os
 import requests
 
@@ -82,7 +83,7 @@ def webhook():
                                 ]
 
                                 result = predict_validate(
-                                    ine=ine, tarjeta=tc, factura=factura
+                                    ine=ine, tarjeta=tc, factura=factura, odometro=30000
                                 )
 
                                 send_message(
@@ -174,9 +175,17 @@ def step_to_prompt(step):
     return prompts.get(step, "📸 Por favor envía una imagen.")
 
 
-def predict_validate(ine: str, tarjeta: str, factura: str):
-    """Función placeholder para validación de predicciones."""
-    return {}
+def predict_validate(ine: str, tarjeta: str, factura: str, odometro: int):
+    llm = get_validation_chatbot()
+
+    return llm.invoke(
+        input={
+            "factura": factura,
+            "tc": tarjeta,
+            "ine": ine,
+            "odometro": odometro,
+        }
+    )
 
 
 # ===========
