@@ -70,6 +70,10 @@ def __scanner(args, scanner: Scanner):
 
 def __image_preprocessing_card(args):
     image = args["image"]
+    print(image.shape)
+    w, h = image.shape[:2]
+    rw, rh = (2 * w) / w, (2 * h) / h
+    image = cv2.resize(image, None, fx=rw, fy=rh, interpolation=cv2.INTER_CUBIC)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     cv2.imwrite(args["doc_name"] + ".jpg", thresh)
@@ -78,6 +82,10 @@ def __image_preprocessing_card(args):
 
 def __image_preprocessing_doc(args):
     image = args["image"]
+    print(image.shape)
+    w, h = image.shape[:2]
+    rw, rh = (2 * w) / w, (2 * h) / h
+    image = cv2.resize(image, None, fx=rw, fy=rh, interpolation=cv2.INTER_CUBIC)
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     cv2.imwrite(args["doc_name"] + ".jpg", thresh)
@@ -108,6 +116,7 @@ def __normalize_document(args):
 
 def __joiner(args):
     dictamen_documental = args["dictamen_documental"]
+    result = 0
 
     if "Aprobado" in dictamen_documental.content:
         to_model: ToModel = args["model_call"]
@@ -131,7 +140,7 @@ def __joiner(args):
         ]
 
         df = pd.DataFrame(data=[rows], columns=cols)
-
+        print(df)
         result = predict(df)
 
     return {
@@ -140,7 +149,7 @@ def __joiner(args):
     }
 
 
-def get_validation_chatbot():
+def get_validation_pipeline():
     __llm = ChatOpenAI(
         model="gpt-4.1-mini",
         temperature=0,
@@ -231,9 +240,9 @@ def get_validation_chatbot():
 
 
 if __name__ == "__main__":
-    chat = get_validation_chatbot()
+    bot = get_validation_pipeline()
 
-    result = chat.invoke(
+    result = bot.invoke(
         input={
             "factura": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181153.jpg",
             "tc": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_183027.jpg",

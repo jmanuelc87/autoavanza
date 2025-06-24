@@ -1,6 +1,6 @@
 from flask import Flask, request
 from collections import defaultdict
-from application.validation import get_validation_chatbot
+from application.validation import get_validation_pipeline
 import os
 import requests
 
@@ -197,7 +197,7 @@ def step_to_prompt(step):
 
 
 def predict_validate(ine: str, tarjeta: str, factura: str, odometro: int):
-    llm = get_validation_chatbot()
+    llm = get_validation_pipeline()
 
     return llm.invoke(
         input={

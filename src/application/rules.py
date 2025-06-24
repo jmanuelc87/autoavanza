@@ -22,16 +22,17 @@ def compare_doc_names(
     Returns:
         str: El resultado de la validacion es aprovado o rechazado
     """
+    print(factura, tarjeta_circulacion, credencial_votar)
     wr1 = fuzz.WRatio(
         factura.nombre_cliente,
-        tarjeta_circulacion.propietario,
+        tarjeta_circulacion.nombre,
         processor=utils.default_process,
     )
     wr2 = fuzz.WRatio(
         factura.nombre_cliente, credencial_votar.nombre, processor=utils.default_process
     )
     wr3 = fuzz.WRatio(
-        tarjeta_circulacion.propietario,
+        tarjeta_circulacion.nombre,
         credencial_votar.nombre,
         processor=utils.default_process,
     )
@@ -182,5 +183,7 @@ def validate_documents(inputs, tools):
             results.extend(result)
         else:
             results.append(result)
+
+    print(results, end="\n\n")
 
     return {"items": results}

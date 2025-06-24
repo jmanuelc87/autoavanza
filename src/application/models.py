@@ -13,7 +13,7 @@ class Factura(BaseModel):
 
 
 class TarjetaCirculacion(BaseModel):
-    propietario: str = Field(description="El propietario o nombre del cliente")
+    nombre: str = Field(description="El nombre del cliente")
     rfc: str = Field(description="El rfc del propietario")
     vehiculo: str = Field(description="La clase y tipo de vehiculo")
     marca: str = Field(description="La marca")

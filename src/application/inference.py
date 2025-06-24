@@ -181,4 +181,4 @@ def predict(df):
 
     result = model.predict(df)
 
-    return 0.8 * np.expm1(result)
+    return 0.7 * np.expm1(result)
