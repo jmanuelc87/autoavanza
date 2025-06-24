@@ -111,9 +111,14 @@ def __joiner(args):
         ]
 
         df = pd.DataFrame(data=[rows], columns=cols)
+        print(end="\n\n\n")
+        print(df, end="\n\n\n")
         result = predict(df)
 
-    return {"dictamen_documental": dictamen_documental.content, "value": result}
+    return {
+        "dictamen_documental": dictamen_documental.content,
+        "value": int(result),
+    }
 
 
 def get_validation_chatbot():
@@ -208,7 +213,7 @@ if __name__ == "__main__":
             "factura": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181153.jpg",
             "tc": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_183027.jpg",
             "ine": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181121.jpg",
-            "odometro": 35000,
+            "odometro": 30000,
         }
     )
 

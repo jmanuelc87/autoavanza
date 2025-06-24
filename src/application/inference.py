@@ -8,7 +8,10 @@ from datetime import datetime
 def __agrupar_carroceria(valor):
     if valor in ["Camioneta SUV", "Crossover", "Todoterreno Ligero"]:
         return "SUV"
-    elif valor in ["Hatchback (5 Puertas)", "Hatchback (3 Puertas)"]:
+    elif valor in [
+        "Hatchback (5 Puertas)",
+        "Hatchback (3 Puertas)",
+    ]:
         return "Hatchback"
     elif valor == "Sedán":
         return "Sedán"

@@ -13,6 +13,7 @@ VERIFY_TOKEN = "NMP123"
 # User state: tracks what step each user is on
 user_state = {}
 user_state_files_holder = {}
+odometro = 0
 
 # Ordered list of required documents
 document_steps = [
@@ -22,6 +23,7 @@ document_steps = [
     "LICENSE_back",
     "INVOICE_front",
     "INVOICE_back",
+    "ODOMETRO",
 ]
 
 # ===========
@@ -83,7 +85,10 @@ def webhook():
                                 ]
 
                                 result = predict_validate(
-                                    ine=ine, tarjeta=tc, factura=factura, odometro=30000
+                                    ine=ine,
+                                    tarjeta=tc,
+                                    factura=factura,
+                                    odometro=odometro,
                                 )
 
                                 send_message(
@@ -93,8 +98,23 @@ def webhook():
 
                                 return "ok", 200
 
+                            if message_type == "text":
+                                current_step = document_steps[step_index]
+                                odometro = int(message["text"]["body"])
+
+                                user_state[phone_number] += 1
+                                if user_state[phone_number] < len(document_steps):
+                                    next_step = document_steps[user_state[phone_number]]
+                                    prompt = step_to_prompt(next_step)
+                                    send_message(phone_number, prompt)
+                                else:
+                                    send_message(
+                                        phone_number,
+                                        "✅ ¡Todos los documentos han sido recibidos correctamente!",
+                                    )
+
                             # Handle image upload
-                            if message_type == "image":
+                            elif message_type == "image":
                                 current_step = document_steps[step_index]
                                 image_id = message["image"]["id"]
                                 file_data = get_image(image_id)
@@ -170,7 +190,8 @@ def step_to_prompt(step):
         "LICENSE_front": "📸 Envíame la *foto del frente de tu licencia de conducir*.",
         "LICENSE_back": "📸 Ahora envía la *foto del reverso de tu licencia*.",
         "INVOICE_front": "📸 Envíame la *foto del frente de la factura del auto*.",
-        "INVOICE_back": "📸 Finalmente, envía la *foto del reverso de la factura*.",
+        "INVOICE_back": "📸 Envíame la *foto del reverso de la factura*.",
+        "ODOMETRO": "Finalmente, envia el kilometraje de tu vehiculo.",
     }
     return prompts.get(step, "📸 Por favor envía una imagen.")
 
