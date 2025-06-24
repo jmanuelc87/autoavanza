@@ -2,13 +2,9 @@
 name = "nmp-autoavanza"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Your Name",email = "you@example.com"}
-]
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
 dependencies = [
-    "opencv-python (>=4.11.0.86,<5.0.0.0)",
     "pymupdf (>=1.25.5,<2.0.0)",
     "transformers (>=4.51.2,<5.0.0)",
     "pillow (>=11.1.0,<12.0.0)",
@@ -41,6 +37,10 @@ dependencies = [
     "rapidfuzz (>=3.13.0,<4.0.0)",
     "dotenv (>=0.9.9,<0.10.0)",
     "flask (>=3.1.1,<4.0.0)",
+    "opencv-python (>=4.11.0.86,<5.0.0.0)",
+    "scikit-image (>=0.25.2,<0.26.0)",
+    "joblib (>=1.5.1,<2.0.0)",
+    "xgboost (==2.1.4)",
 ]
 
 
