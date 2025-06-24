@@ -10,6 +10,7 @@ from PIL import Image
 
 from tempfile import NamedTemporaryFile
 
+from application.inference import predict
 from application.prompts import extract, validate
 from application.rules import tools, validate_documents
 from application.document import Scanner
@@ -97,13 +98,22 @@ def __joiner(args):
             factura.modelo,
             factura.marca,
             factura.version,
+            args["odometro"],
         ]
-        cols = ["carroceria", "color", "combustible", "fecha", "marca", "modelo"]
+        cols = [
+            "carroceria",
+            "color",
+            "combustible",
+            "fecha",
+            "marca",
+            "modelo",
+            "odometro_clean",
+        ]
 
         df = pd.DataFrame(data=[rows], columns=cols)
-        df.to_csv("data_extraction_for_pred.csv")
+        result = predict(df)
 
-    return {"dictamen_documental": dictamen_documental}
+    return {"dictamen_documental": dictamen_documental.content, "value": result}
 
 
 def get_validation_chatbot():
@@ -186,6 +196,7 @@ def get_validation_chatbot():
         | validation_prompt
         | __llm,
         "model_call": extract_chain,
+        "odometro": itemgetter("odometro"),
     } | RunnableLambda(__joiner)
 
 
@@ -197,6 +208,7 @@ if __name__ == "__main__":
             "factura": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181153.jpg",
             "tc": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_183027.jpg",
             "ine": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181121.jpg",
+            "odometro": 35000,
         }
     )
 

@@ -1,6 +1,6 @@
 import joblib
+import numpy as np
 import pandas as pd
-import xgboost as xgb
 
 from datetime import datetime
 
@@ -69,7 +69,7 @@ def __agrupar_color(color):
         return "Otro"
 
 
-alta_gama = [
+__alta_gama = [
     "Mercedes Benz",
     "BMW",
     "Audi",
@@ -89,7 +89,7 @@ alta_gama = [
     "Alfa Romeo",
 ]
 
-media_alta = [
+__media_alta = [
     "Mazda",
     "Mini",
     "Jeep",
@@ -102,7 +102,7 @@ media_alta = [
     "BYD",
 ]
 
-media_baja = [
+__media_baja = [
     "Chevrolet",
     "Nissan",
     "Ford",
@@ -118,7 +118,7 @@ media_baja = [
     "GMC",
 ]
 
-baja_gama = [
+__baja_gama = [
     "JAC",
     "Changan",
     "Jetour",
@@ -142,29 +142,29 @@ baja_gama = [
 ]
 
 # Diccionario de mapeo ordinal
-gama_orden = {"Baja": 1, "Media-Baja": 2, "Media-Alta": 3, "Alta": 4}
+__gama_orden = {"Baja": 1, "Media-Baja": 2, "Media-Alta": 3, "Alta": 4}
 
 
 # Clasificación textual
 def __clasificar_marca_4gamas(marca):
-    if marca in alta_gama:
+    if marca in __alta_gama:
         return "Alta"
-    elif marca in media_alta:
+    elif marca in __media_alta:
         return "Media-Alta"
-    elif marca in media_baja:
+    elif marca in __media_baja:
         return "Media-Baja"
     else:
         return "Baja"
 
 
-def __predict(df):
+def predict(df):
     df["carroceria_cat"] = df["carroceria"].apply(__agrupar_carroceria)
     df["color_CAT"] = df["color"].apply(__agrupar_color)
     df["combustible_bin"] = df["combustible"].apply(
         lambda x: 1 if x in ["Gasolina", "Diésel"] else 0
     )
     df["marca_gama"] = df["marca"].apply(__clasificar_marca_4gamas)
-    df["marca_ordinal"] = df["marca_gama"].map(gama_orden)
+    df["marca_ordinal"] = df["marca_gama"].map(__gama_orden)
     df["edad_auto"] = datetime.now().year - df["fecha"].astype(int)
 
     seminuevos_df = pd.read_csv("data/seminuevos.csv")
@@ -174,15 +174,9 @@ def __predict(df):
         seminuevos_df["modelo"].isin(top_models), "Otro Modelo"
     )
 
-    with open("models/XGBoost_pipeline.joblib", "rb") as file:
+    with open("models/MLP_pipeline.joblib", "rb") as file:
         model = joblib.load(file)
 
     result = model.predict(df)
 
-    return result
-
-
-if __name__ == "__main__":
-    df = pd.read_csv("data_extraction_for_pred.csv")
-    result = __predict(df)
-    print(result)
+    return 0.8 * np.expm1(result)
