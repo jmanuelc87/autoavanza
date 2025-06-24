@@ -41,6 +41,7 @@ dependencies = [
     "scikit-image (>=0.25.2,<0.26.0)",
     "joblib (>=1.5.1,<2.0.0)",
     "xgboost (==2.1.4)",
+    "python-telegram-bot (>=22.1,<23.0)",
 ]
 
 

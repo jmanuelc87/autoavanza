@@ -24,3 +24,18 @@ validate = [
     ),
     HumanMessagePromptTemplate.from_template("""{items}"""),
 ]
+
+normalize = [
+    SystemMessagePromptTemplate.from_template(
+        "Eres un asistente servicial, normalizas los siguientes valores de acuerdo a las reglas propuestas"
+    ),
+    HumanMessagePromptTemplate.from_template("{values}"),
+    HumanMessagePromptTemplate.from_template(
+        """Reglas: 
+            - La carroceria debe caer en alguna de estas categorias: SUV, Hatchback, Sedán, Pickup, Van, Minivan, Deportivo, Camioneta, Familiar, u Otro.
+            - El color debe caer en alguna de estar categorias: Blanco, Gris/Plata, Negro, Rojo/Burdeos, Azul, Verde, Marrón, Amarillo/Dorado, Naranja, Morado, u Otro.
+            - El combustible debe caer en alguna de estas categorias: Gasolina o Diésel.
+            - La marca debe caer en alguna de estas categorias: Mercedes Benz, BMW, Audi, Porsche, Lexus, Volvo, Jaguar, Land Rover, Tesla, Ferrari, Aston Martin, Maserati, Cupra, Infiniti, Cadillac, Acura, Alfa Romeo, Mazda, Mini, Jeep, Volkswagen, Kia, Toyota, Honda, Hyundai, SEAT, BYD, Chevrolet, Nissan, Ford, Peugeot, Renault, Fiat, Mitsubishi, Dodge, Chrysler, Buick, RAM, MG, GMC, JAC, Changan, Jetour, Omoda, GWM, Smart, Baic, Chirey, Geely, Jaecoo, GAC, Pontiac, Otra Marca, JMC, can-am, Hummer, Saab, Kenworth, Hino, Mercury u Otro.
+            - El modelo debe caer en alguna de estas categorias: {modelo_categorias}, u Otro Modelo."""
+    ),
+]

@@ -161,7 +161,6 @@ def __clasificar_marca_4gamas(marca):
 
 
 def predict(df):
-    df["carroceria_cat"] = df["carroceria"].apply(__agrupar_carroceria)
     df["color_CAT"] = df["color"].apply(__agrupar_color)
     df["combustible_bin"] = df["combustible"].apply(
         lambda x: 1 if x in ["Gasolina", "Diésel"] else 0

@@ -1,6 +1,7 @@
 import os
 import sys
 import cv2
+import json
 import fitz
 import dotenv
 import functools
@@ -11,10 +12,10 @@ from PIL import Image
 from tempfile import NamedTemporaryFile
 
 from application.inference import predict
-from application.prompts import extract, validate
+from application.prompts import extract, validate, normalize
 from application.rules import tools, validate_documents
 from application.document import Scanner
-from application.models import Factura, TarjetaCirculacion, CredencialVotar
+from application.models import Factura, TarjetaCirculacion, CredencialVotar, ToModel
 
 from operator import itemgetter
 
@@ -83,25 +84,44 @@ def __image_preprocessing_doc(args):
     return {"image": Image.fromarray(thresh)}
 
 
+def __normalize_document(args):
+    factura = args["factura"]
+    tarjeta = args["tarjeta_circulacion"]
+
+    rows = {
+        "carroceria": tarjeta.vehiculo,
+        "color": factura.color,
+        "combustible": tarjeta.combustible,
+        "fecha": factura.modelo,
+        "marca": factura.marca,
+        "modelo": factura.version,
+    }
+
+    seminuevos_df = pd.read_csv("data/seminuevos.csv")
+    top_models = seminuevos_df["modelo"].value_counts().nlargest(300).index
+
+    return {
+        "values": json.dumps(rows),
+        "modelo_categorias": ",".join(top_models.to_list()),
+    }
+
+
 def __joiner(args):
     dictamen_documental = args["dictamen_documental"]
 
     if "Aprobado" in dictamen_documental.content:
-        # create dataframe and send it to the model
-        factura = args["model_call"]["factura"]
-        tarjeta = args["model_call"]["tarjeta_circulacion"]
-
+        to_model: ToModel = args["model_call"]
         rows = [
-            tarjeta.vehiculo,
-            factura.color,
-            tarjeta.combustible,
-            factura.modelo,
-            factura.marca,
-            factura.version,
+            to_model.carroceria,
+            to_model.color,
+            to_model.combustible,
+            to_model.fecha,
+            to_model.marca,
+            to_model.modelo,
             args["odometro"],
         ]
         cols = [
-            "carroceria",
+            "carroceria_cat",
             "color",
             "combustible",
             "fecha",
@@ -111,8 +131,7 @@ def __joiner(args):
         ]
 
         df = pd.DataFrame(data=[rows], columns=cols)
-        print(end="\n\n\n")
-        print(df, end="\n\n\n")
+
         result = predict(df)
 
     return {
@@ -194,13 +213,19 @@ def get_validation_chatbot():
     }
 
     validation_prompt = ChatPromptTemplate.from_messages(validate)
+    normalize_prompt = ChatPromptTemplate.from_messages(normalize)
+
+    normalize_chain = RunnableLambda(__normalize_document)
 
     return {
         "dictamen_documental": extract_chain
         | validation_chain
         | validation_prompt
         | __llm,
-        "model_call": extract_chain,
+        "model_call": extract_chain
+        | normalize_chain
+        | normalize_prompt
+        | __llm.with_structured_output(ToModel),
         "odometro": itemgetter("odometro"),
     } | RunnableLambda(__joiner)
 
@@ -213,7 +238,7 @@ if __name__ == "__main__":
             "factura": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181153.jpg",
             "tc": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_183027.jpg",
             "ine": "data/bronze/BASE_AUTOAVANZA/Caso 0/20250612_181121.jpg",
-            "odometro": 30000,
+            "odometro": 45000,
         }
     )
 

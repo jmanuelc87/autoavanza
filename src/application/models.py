@@ -31,3 +31,12 @@ class CredencialVotar(BaseModel):
     domicilio: str = Field(description="El domicilio de la persona")
     emision: int = Field(description="La fecha de emision")
     vigencia: str = Field(description="Los años de vigencia")
+
+
+class ToModel(BaseModel):
+    carroceria: str = Field(description="carroceria")
+    color: str = Field(description="color")
+    combustible: str = Field(description="combustible")
+    fecha: str = Field(description="fecha")
+    marca: str = Field(description="marca")
+    modelo: str = Field(description="modelo")

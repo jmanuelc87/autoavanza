@@ -1,13 +1,13 @@
 from flask import Flask, request
 from collections import defaultdict
-from application.main import get_validation_chatbot
+from application.validation import get_validation_chatbot
 import os
 import requests
 
 app = Flask(__name__)
 
 # Meta credentials
-ACCESS_TOKEN = "EAAZABXF6q620BO18F6GsDYPbI2sN7gnhWxA8i0Lk9o6c9rXvJPL7qOmZCyqIO2WqujZBtmCFkZBuQRKNEZBQ3RYBjeTtfQNBSBTDY8xgn9ecPZBZAh632g5QM54M3fIKzYkgkhvy7zUvcCRqZCANa2wY9HUXrciqL0iaPe1IuKzedCO5ztEJ1sDC9oxKBfDWIWS4BA26TZAYbEtjf6ZCnm2dk9DH05QDbkj5S1A91woK7MkrLfGGwb"
+ACCESS_TOKEN = "EAAZABXF6q620BO6lsZANu8COvoenApKsir8HWIovZCTaqeJA9r8BZCy3ViRRaq0N4nveGyJZAxr1AepWot9MV4Ja0azDP5AwSzmgVDS0nlTIWS3xoSpNRxsk6DZBtxaAiIPG8fUNn2JWsYUZAh2RVtCTPZAfkD2KP2sMoezmqbLkrvCD5bkTOWyzYYGsxcuShw7ouTJOPKUZAyHWsQCMnAyS0OlqbEfQ2TraDGxmDsmlHUaxykIKNzSRksOpK6"
 VERIFY_TOKEN = "NMP123"
 
 # User state: tracks what step each user is on
