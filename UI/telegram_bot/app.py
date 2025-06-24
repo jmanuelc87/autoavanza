@@ -1,4 +1,5 @@
 import os
+import locale
 import logging
 import dotenv
 
@@ -26,6 +27,9 @@ from telegram.ext import (
 from application.validation import get_validation_pipeline
 
 dotenv.load_dotenv(dotenv.find_dotenv())
+
+
+locale.setlocale(locale.LC_ALL, "")
 
 API_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 
@@ -120,9 +124,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Tu dictamen fue {result['dictamen_documental']}"
         )
 
-        if result["dictamen_documental"] == "Aprovado":
+        if result["dictamen_documental"] == "Aprobado":
+            amount = locale.currency(result["value"], grouping=True)
             await update.message.reply_text(
-                f"Te prestamos hasta {result['value']} del valor de tu coche."
+                f"Te prestamos hasta {amount} del valor de tu coche."
             )
     else:
         result = pipeline.invoke(

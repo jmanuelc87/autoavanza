@@ -62,14 +62,14 @@ def compare_vin(
 
     result = []
 
-    if wr >= 90.0:
+    if wr >= 70.0:
         result.append("El NIV del vehiculo es correcto!")
     else:
         result.append("El NIV no coincide")
 
     wr2 = fuzz.WRatio(factura.no_motor, tarjeta_circulacion.no_motor)
 
-    if wr >= 90.0:
+    if wr >= 70.0:
         result.append("El numero de serie del motor es correcto!")
     else:
         result.append("El numero de serie del motor no coincide")
@@ -93,19 +93,19 @@ def compare_vehicle_data(
 
     wr = fuzz.WRatio(factura.marca, tarjeta_circulacion.marca)
 
-    if wr < 90.0:
+    if wr < 80.0:
         label = f"La marca del vehiculo es distinto."
         result.append(label)
 
     wr = fuzz.WRatio(factura.version, tarjeta_circulacion.vehiculo)
 
-    if wr < 90.0:
+    if wr < 80.0:
         label = "La version del vehiculo es distinta."
         result.append(label)
 
     wr = fuzz.WRatio(str(factura.modelo), str(tarjeta_circulacion.modelo))
 
-    if wr < 90.0:
+    if wr < 80.0:
         label = "El modelo del vehiculo es distinto."
         result.append(label)
 
@@ -129,7 +129,7 @@ def compare_motor(
     """
     wr = fuzz.WRatio(factura.no_motor, tarjeta_circulacion.no_motor)
 
-    if wr < 90.0:
+    if wr < 80.0:
         return "El numero de motor del vehiculo es distinto. Favor de verificar"
 
     return "El numero de motor es correcto!"
