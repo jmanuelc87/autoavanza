@@ -7,7 +7,6 @@ requires-python = ">=3.10,<4.0"
 dependencies = [
     "pymupdf (>=1.25.5,<2.0.0)",
     "transformers (>=4.51.2,<5.0.0)",
-    "pillow (>=11.1.0,<12.0.0)",
     "torch (>=2.6.0,<3.0.0)",
     "torchvision (>=0.21.0,<0.22.0)",
     "progress (>=1.6,<2.0)",
@@ -42,6 +41,7 @@ dependencies = [
     "joblib (>=1.5.1,<2.0.0)",
     "xgboost (==2.1.4)",
     "python-telegram-bot (>=22.1,<23.0)",
+    "pillow (>=11.3.0,<12.0.0)",
 ]
 
 
